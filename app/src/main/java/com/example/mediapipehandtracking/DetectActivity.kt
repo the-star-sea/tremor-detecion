@@ -190,4 +190,41 @@ class DetectActivity : AppCompatActivity() {
         }
         return multiHandLandmarksStr
     }
+    private fun sft( multiHandLandmarks: List<NormalizedLandmarkList>
+    ):Double{
+        if (multiHandLandmarks.isEmpty()) {
+            return -1.0
+        }
+        if (multiHandLandmarks.size>1) {
+            return -2.0
+        }
+        var v1=multiHandLandmarks.get(0).getLandmarkList().get(4).getX()
+        var v2=multiHandLandmarks.get(0).getLandmarkList().get(8).getX()
+
+        var v3=multiHandLandmarks.get(0).getLandmarkList().get(4).getY()
+        var v4=multiHandLandmarks.get(0).getLandmarkList().get(8).getY()
+
+        var v5=multiHandLandmarks.get(0).getLandmarkList().get(4).getZ()
+        var v6=multiHandLandmarks.get(0).getLandmarkList().get(8).getZ()
+        return Math.sqrt(((v1-v2)*(v1-v2)+(v3-v4)*(v3-v4)+(v5-v6)*(v5-v6)).toDouble())
+    }
+
+    private fun shm( multiHandLandmarks: List<NormalizedLandmarkList>
+    ):Double{
+        if (multiHandLandmarks.isEmpty()) {
+            return -1.0
+        }
+        if (multiHandLandmarks.size>1) {
+            return -2.0
+        }
+        var v1=multiHandLandmarks.get(0).getLandmarkList().get(4).getX()
+        var v2=multiHandLandmarks.get(0).getLandmarkList().get(8).getX()
+
+        var v3=multiHandLandmarks.get(0).getLandmarkList().get(4).getY()
+        var v4=multiHandLandmarks.get(0).getLandmarkList().get(8).getY()
+
+        var v5=multiHandLandmarks.get(0).getLandmarkList().get(4).getZ()
+        var v6=multiHandLandmarks.get(0).getLandmarkList().get(8).getZ()
+        return Math.sqrt(((v1-v2)*(v1-v2)+(v3-v4)*(v3-v4)+(v5-v6)*(v5-v6)).toDouble())
+    }
 }
