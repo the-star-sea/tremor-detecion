@@ -1,5 +1,6 @@
 package com.example.mediapipehandtracking
 
+import android.graphics.PointF
 import android.graphics.SurfaceTexture
 import android.os.Bundle
 import android.util.Log
@@ -209,6 +210,45 @@ class DetectActivity : AppCompatActivity() {
         return Math.sqrt(((v1-v2)*(v1-v2)+(v3-v4)*(v3-v4)+(v5-v6)*(v5-v6)).toDouble())
     }
 
+    private fun xmulti(p1: PointF, p2: PointF, p0: PointF): Float
+    {
+        return (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y)
+    }
+
+    fun getS(a: PointF, b: PointF, c: PointF): Float
+    {
+        return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) / 2
+    }
+
+    fun getPS(p: Array<PointF>, pl: IntArray, n: Int): Float
+    {
+        var sumS = 0.0F
+        for (i in 2..n - 1) sumS += Math.abs(getS(p[pl[1]], p[pl[i]], p[pl[i + 1]]))
+        return sumS
+    }
+
+    private fun graham(point: Array<PointF>,n: Int, pl: IntArray): Int{
+        var i:Int
+        var t:Int = 1
+        for(i in 1..n){
+            if(point[i].y<point[t].y){
+                t=i
+            }
+        }
+        var num:Int = 1
+        do {
+            num++;
+            t = pl[num-1]+1;
+            if (t > n) t = 1
+            for (i in 1..n) {
+                val x: Float = xmulti(point.get(i), point.get(t), point.get(pl[num - 1]))
+                if (x < 0) t = i
+            }
+            pl[num] = t
+        }while(pl[num]!=pl[1])
+        return num-1
+    }
+
     private fun shm( multiHandLandmarks: List<NormalizedLandmarkList>
     ):Double{
         if (multiHandLandmarks.isEmpty()) {
@@ -217,16 +257,19 @@ class DetectActivity : AppCompatActivity() {
         if (multiHandLandmarks.size>1) {
             return -2.0
         }
-        var v1=multiHandLandmarks.get(0).getLandmarkList().get(4).getX()
-        var v2=multiHandLandmarks.get(0).getLandmarkList().get(8).getX()
 
-        var v3=multiHandLandmarks.get(0).getLandmarkList().get(4).getY()
-        var v4=multiHandLandmarks.get(0).getLandmarkList().get(8).getY()
+        var point = Array(25,{PointF(0F,0F)})
+        var pl = IntArray(25)
 
-        var v5=multiHandLandmarks.get(0).getLandmarkList().get(4).getZ()
-        var v6=multiHandLandmarks.get(0).getLandmarkList().get(8).getZ()
-        return Math.sqrt(((v1-v2)*(v1-v2)+(v3-v4)*(v3-v4)+(v5-v6)*(v5-v6)).toDouble())
+        for (index in point.indices){
+            point[index]= PointF(multiHandLandmarks[0].getLandmarkList()[index].getX(),multiHandLandmarks[0].getLandmarkList()[index].getY())
+        }
+
+        var num: Int = graham(point, 20, pl)
+
+        return getPS(point,pl,num).toDouble()
     }
+
     fun med(list: List<Float>) = list.sorted().let {
         (it[it.size / 2] + it[(it.size - 1) / 2]) / 2
     }
