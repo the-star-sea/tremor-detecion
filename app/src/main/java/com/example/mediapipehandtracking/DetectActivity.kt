@@ -227,4 +227,27 @@ class DetectActivity : AppCompatActivity() {
         var v6=multiHandLandmarks.get(0).getLandmarkList().get(8).getZ()
         return Math.sqrt(((v1-v2)*(v1-v2)+(v3-v4)*(v3-v4)+(v5-v6)*(v5-v6)).toDouble())
     }
+    fun med(list: List<Float>) = list.sorted().let {
+        (it[it.size / 2] + it[(it.size - 1) / 2]) / 2
+    }
+    private fun sps( multiHandLandmarks: List<NormalizedLandmarkList>
+    ): Float {
+        if (multiHandLandmarks.isEmpty()) {
+            return -1.0f
+        }
+        if (multiHandLandmarks.size>1) {
+            return -2.0f
+        }
+        var v1=multiHandLandmarks.get(0).getLandmarkList().get(1).getX()
+        var v2=multiHandLandmarks.get(0).getLandmarkList().get(2).getX()
+        var v3=multiHandLandmarks.get(0).getLandmarkList().get(3).getX()
+        var v4=multiHandLandmarks.get(0).getLandmarkList().get(4).getX()
+        var med1= med(listOf(v1,v2,v3,v4))
+        var v17=multiHandLandmarks.get(0).getLandmarkList().get(17).getX()
+        var v18=multiHandLandmarks.get(0).getLandmarkList().get(18).getX()
+        var v19=multiHandLandmarks.get(0).getLandmarkList().get(19).getX()
+        var v20=multiHandLandmarks.get(0).getLandmarkList().get(20).getX()
+        var med2= med(listOf(v17,v18,v19,v20))
+        return med1-med2
+    }
 }
