@@ -234,9 +234,7 @@ class DetectActivity : AppCompatActivity() {
         if (multiHandLandmarks.isEmpty()) {
             return -1.0
         }
-        if (multiHandLandmarks.size>1) {
-            return -2.0
-        }
+
         var v1=multiHandLandmarks.get(0).getLandmarkList().get(4).getX()
         var v2=multiHandLandmarks.get(0).getLandmarkList().get(8).getX()
 
@@ -297,12 +295,9 @@ class DetectActivity : AppCompatActivity() {
         if (multiHandLandmarks.isEmpty()) {
             return -1.0
         }
-        if (multiHandLandmarks.size>1) {
-            return -2.0
-        }
 
         var point = Array(22,{PointF(0F,0F)})
-        var pl = IntArray(22)
+        var pl = IntArray(25)
 
         for (index in 1..21){
             point[index]= PointF(multiHandLandmarks[0].getLandmarkList()[index-1].getX(),multiHandLandmarks[0].getLandmarkList()[index-1].getY())
@@ -321,9 +316,7 @@ class DetectActivity : AppCompatActivity() {
         if (multiHandLandmarks.isEmpty()) {
             return -1.0
         }
-        if (multiHandLandmarks.size>1) {
-            return -2.0
-        }
+
         var v1=multiHandLandmarks.get(0).getLandmarkList().get(1).getX()
         var v2=multiHandLandmarks.get(0).getLandmarkList().get(2).getX()
         var v3=multiHandLandmarks.get(0).getLandmarkList().get(3).getX()
