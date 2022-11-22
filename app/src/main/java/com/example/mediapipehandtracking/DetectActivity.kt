@@ -9,7 +9,14 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mediapipehandtracking.remote.ApiService
+import com.example.mediapipehandtracking.remote.Network
+import com.example.mediapipehandtracking.responseClasses.ResponseClass
+import com.example.mediapipehandtracking.responseClasses.ResponseRegisterClass
+import com.example.mediapipehandtracking.responseClasses.ResponseSignalClass
+import com.example.mediapipehandtracking.responseClasses.ResponseSignalIdClass
 import com.google.mediapipe.components.CameraHelper.CameraFacing
 import com.google.mediapipe.components.CameraXPreviewHelper
 import com.google.mediapipe.components.ExternalTextureConverter
@@ -20,6 +27,9 @@ import com.google.mediapipe.framework.AndroidAssetUtil
 import com.google.mediapipe.framework.Packet
 import com.google.mediapipe.framework.PacketGetter
 import com.google.mediapipe.glutil.EglManager
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class DetectActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -90,6 +100,34 @@ class DetectActivity : AppCompatActivity() {
                         + "] "
                         + getMultiHandLandmarksDebugString(multiHandLandmarks)
             )
+
+            var sft = sft(multiHandLandmarks)
+            var shm = shm(multiHandLandmarks)
+            var sps = sps(multiHandLandmarks)
+
+            val apiService: ApiService = Network.getInstance().create(ApiService::class.java)
+            val responseSignalClass = ResponseSignalClass(
+                sft,shm,sps,packet.timestamp
+            )
+            apiService.save(responseSignalClass)
+                .enqueue(object : Callback<ResponseSignalIdClass> {
+                    override fun onResponse(
+                        call: Call<ResponseSignalIdClass?>,
+                        response: Response<ResponseSignalIdClass?>
+                    ) {
+                        if (response.body() != null) {
+                            // ...
+                        } else {
+                            Toast.makeText(
+                                this@DetectActivity,
+                                "something went wrong! please try again",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<ResponseSignalIdClass?>, t: Throwable) {}
+                })
         }
         PermissionHelper.checkAndRequestCameraPermissions(this)
     }
@@ -207,6 +245,8 @@ class DetectActivity : AppCompatActivity() {
 
         var v5=multiHandLandmarks.get(0).getLandmarkList().get(4).getZ()
         var v6=multiHandLandmarks.get(0).getLandmarkList().get(8).getZ()
+
+        print(v1.toString()+" "+v2.toString()+" "+v3.toString()+" "+v4.toString()+" "+v5.toString()+" "+v6.toString())
         return Math.sqrt(((v1-v2)*(v1-v2)+(v3-v4)*(v3-v4)+(v5-v6)*(v5-v6)).toDouble())
     }
 
@@ -235,14 +275,18 @@ class DetectActivity : AppCompatActivity() {
                 t=i
             }
         }
+
+        pl[1]=t
         var num:Int = 1
+
         do {
             num++;
             t = pl[num-1]+1;
             if (t > n) t = 1
             for (i in 1..n) {
                 val x: Float = xmulti(point.get(i), point.get(t), point.get(pl[num - 1]))
-                if (x < 0) t = i
+                if (x < 0)
+                    t = i
             }
             pl[num] = t
         }while(pl[num]!=pl[1])
@@ -258,14 +302,14 @@ class DetectActivity : AppCompatActivity() {
             return -2.0
         }
 
-        var point = Array(25,{PointF(0F,0F)})
-        var pl = IntArray(25)
+        var point = Array(22,{PointF(0F,0F)})
+        var pl = IntArray(22)
 
-        for (index in point.indices){
-            point[index]= PointF(multiHandLandmarks[0].getLandmarkList()[index].getX(),multiHandLandmarks[0].getLandmarkList()[index].getY())
+        for (index in 1..21){
+            point[index]= PointF(multiHandLandmarks[0].getLandmarkList()[index-1].getX(),multiHandLandmarks[0].getLandmarkList()[index-1].getY())
         }
 
-        var num: Int = graham(point, 20, pl)
+        var num: Int = graham(point, 21, pl)
 
         return getPS(point,pl,num).toDouble()
     }
@@ -274,12 +318,12 @@ class DetectActivity : AppCompatActivity() {
         (it[it.size / 2] + it[(it.size - 1) / 2]) / 2
     }
     private fun sps( multiHandLandmarks: List<NormalizedLandmarkList>
-    ): Float {
+    ): Double {
         if (multiHandLandmarks.isEmpty()) {
-            return -1.0f
+            return -1.0
         }
         if (multiHandLandmarks.size>1) {
-            return -2.0f
+            return -2.0
         }
         var v1=multiHandLandmarks.get(0).getLandmarkList().get(1).getX()
         var v2=multiHandLandmarks.get(0).getLandmarkList().get(2).getX()
@@ -291,6 +335,6 @@ class DetectActivity : AppCompatActivity() {
         var v19=multiHandLandmarks.get(0).getLandmarkList().get(19).getX()
         var v20=multiHandLandmarks.get(0).getLandmarkList().get(20).getX()
         var med2= med(listOf(v17,v18,v19,v20))
-        return med1-med2
+        return (med1-med2).toDouble()
     }
 }
