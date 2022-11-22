@@ -246,7 +246,6 @@ class DetectActivity : AppCompatActivity() {
         var v5=multiHandLandmarks.get(0).getLandmarkList().get(4).getZ()
         var v6=multiHandLandmarks.get(0).getLandmarkList().get(8).getZ()
 
-        print(v1.toString()+" "+v2.toString()+" "+v3.toString()+" "+v4.toString()+" "+v5.toString()+" "+v6.toString())
         return Math.sqrt(((v1-v2)*(v1-v2)+(v3-v4)*(v3-v4)+(v5-v6)*(v5-v6)).toDouble())
     }
 
