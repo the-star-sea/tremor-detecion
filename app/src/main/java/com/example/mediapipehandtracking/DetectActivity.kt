@@ -1,5 +1,6 @@
 package com.example.mediapipehandtracking
 
+import android.content.Intent
 import android.graphics.PointF
 import android.graphics.SurfaceTexture
 import android.os.Bundle
@@ -9,6 +10,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mediapipehandtracking.remote.ApiService
@@ -56,6 +58,7 @@ class DetectActivity : AppCompatActivity() {
     private var previewFrameTexture: SurfaceTexture? = null
     // {@link SurfaceView} that displays the camera-preview frames processed by a MediaPipe graph.
     private var previewDisplayView: SurfaceView? = null
+
     // Creates and manages an {@link EGLContext}.
     private var eglManager: EglManager? = null
     // Sends camera-preview frames into a MediaPipe graph for processing, and displays the processed
@@ -67,10 +70,14 @@ class DetectActivity : AppCompatActivity() {
     // Handles camera access via the {@link CameraX} Jetpack support library.
     private var cameraHelper: CameraXPreviewHelper? = null
 
+    private var returnResult: String = "0"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         previewDisplayView = SurfaceView(this)
+        var detectionResult = findViewById<TextView>(R.id.detection_result)
+        detectionResult.text = "Not Detect"
         setupPreviewDisplayView()
         // Initialize asset manager so that MediaPipe native libraries can access the app assets,
         // e.g., binary graphs.
@@ -117,6 +124,31 @@ class DetectActivity : AppCompatActivity() {
                     ) {
                         if (response.body() != null) {
                             // ...
+                            if(returnResult == "1"){
+                                detectionResult.text = "Tremor" + "[" + response.body()!!.signalId % 20 + "/20]"
+                            }else{
+                                detectionResult.text = "Not Tremor" + "[" + response.body()!!.signalId % 20 + "/20]"
+                            }
+                            if(response.body()!!.signalId % 20 == 0){
+                                apiService.ditection()
+                                    .enqueue(object : Callback<Int?> {
+                                        override fun onResponse(
+                                            call: Call<Int?>,
+                                            response: Response<Int?>
+                                        ) {
+                                            if (response.body() != null) {
+                                                Log.d(TAG, "======================================="+response.body().toString())
+                                                returnResult = response.body().toString()
+
+//                                                detectionResult.text = returnResult
+                                            }
+                                        }
+
+                                        override fun onFailure(call: Call<Int?>, t: Throwable) {
+
+                                        }
+                                    })
+                            }
                         } else {
                             Toast.makeText(
                                 this@DetectActivity,

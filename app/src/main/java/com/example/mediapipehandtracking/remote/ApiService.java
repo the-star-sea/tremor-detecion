@@ -23,6 +23,8 @@ public interface ApiService {
     Call<ResponseSignalIdClass> save(@Body ResponseSignalClass responseSignalClass);
 
     @GET("/signal/ditection")
-    Call<Integer> ditection(@Body ResponseSignalClass responseSignalClass);
+    Call<Integer> ditection();
+
+
 
 }
